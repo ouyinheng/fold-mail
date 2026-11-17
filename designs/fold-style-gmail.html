@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fold — Gmail 风格</title>
+<style>
+:root[data-theme="light"]{
+  --paper:#FFFFFF;
+  --paper-2:#FFFFFF;
+  --sidebar:#F7F9FC;
+  --list:#FFFFFF;
+  --ink:#202124;
+  --ink-2:#5F6368;
+  --ink-3:#9AA0A6;
+  --line:#E8EAED;
+  --line-soft:#F1F3F4;
+  --accent:#1A73E8;
+  --accent-soft:#E8F0FE;
+  --accent-ink:#1967D2;
+  --unread:#1A73E8;
+  --hover:rgba(60,64,67,.08);
+  --selected:#E8F0FE;
+  --card:#FFFFFF;
+  --chip:#F1F3F4;
+  --shadow:0 24px 60px rgba(32,33,36,.2),0 3px 10px rgba(32,33,36,.1);
+  --shadow-sm:0 3px 12px rgba(32,33,36,.12);
+  --ok:#188038;
+  --warn:#F29900;
+  --track:#D93025;
+}
+:root[data-theme="dark"]{
+  --paper:#202124;
+  --paper-2:#252629;
+  --sidebar:#282A2E;
+  --list:#202124;
+  --ink:#E8EAED;
+  --ink-2:#9AA0A6;
+  --ink-3:#7A7F87;
+  --line:#3C4043;
+  --line-soft:#303134;
+  --accent:#8AB4F8;
+  --accent-soft:#28304A;
+  --accent-ink:#AECBFA;
+  --unread:#8AB4F8;
+  --hover:rgba(255,255,255,.08);
+  --selected:#28304A;
+  --card:#2A2B2F;
+  --chip:#3C4043;
+  --shadow:0 24px 60px rgba(0,0,0,.6),0 3px 10px rgba(0,0,0,.4);
+  --shadow-sm:0 4px 14px rgba(0,0,0,.45);
+  --ok:#81C995;
+  --warn:#FDD663;
+  --track:#F28B82;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--paper); color:var(--ink); font-size:13px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+  transition:background .12s ease,color .12s ease;
+}
+button{font-family:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea{font-family:inherit;color:inherit}
+::selection{background:var(--accent-soft);color:var(--accent-ink)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-3);background-clip:padding-box;border:2px solid transparent}
+.hidden{display:none !important}
+
+/* ============ 应用骨架 ============ */
+.app{height:100vh;display:flex;flex-direction:column}
+.titlebar{
+  height:46px;flex:none;display:flex;align-items:center;gap:14px;
+  padding:0 16px;border-bottom:1px solid var(--line);background:var(--sidebar);
+}
+.traffic{display:flex;gap:8px;align-items:center}
+.traffic i{width:12px;height:12px;border-radius:50%;display:block}
+.traffic i:nth-child(1){background:#FF5F57}.traffic i:nth-child(2){background:#FEBC2E}.traffic i:nth-child(3){background:#28C840}
+.searchbox{
+  flex:1;max-width:520px;margin:0 auto;display:flex;align-items:center;gap:8px;
+  height:28px;padding:0 10px;border-radius:7px;background:var(--chip);border:1px solid transparent;
+  transition:border .12s,background .12s;
+}
+.searchbox:focus-within{border-color:var(--accent);background:var(--card)}
+.searchbox input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:12.5px}
+.searchbox input::placeholder{color:var(--ink-3)}
+.kbd{font-size:10px;color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap}
+.title-actions{display:flex;gap:4px;align-items:center}
+
+.workspace{flex:1;display:flex;min-height:0}
+
+/* ---------- 左栏 ---------- */
+.sidebar{width:224px;flex:none;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px 10px}
+.brand{display:flex;align-items:center;gap:9px;padding:2px 8px 16px}
+.brand-logo{width:26px;height:26px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;letter-spacing:-.5px}
+.brand-name{font-weight:650;font-size:14px;letter-spacing:.2px}
+.brand-sub{font-size:10px;color:var(--ink-3);margin-top:-2px}
+.nav-group{margin-bottom:16px}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.9px;color:var(--ink-3);text-transform:uppercase;padding:0 10px 6px}
+.nav-item{
+  width:100%;display:flex;align-items:center;gap:10px;height:32px;padding:0 10px;border-radius:6px;
+  color:var(--ink-2);font-size:12.5px;text-align:left;transition:background .1s,color .1s;
+}
+.nav-item:hover{background:var(--hover);color:var(--ink)}
+.nav-item.active{background:var(--selected);color:var(--accent-ink);font-weight:550}
+.nav-item svg{flex:none;opacity:.85}
+.nav-count{margin-left:auto;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.nav-item.active .nav-count{color:var(--accent-ink)}
+.sidebar-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:2px}
+.foot-row{display:flex;gap:4px}
+.seg{display:flex;background:var(--chip);border-radius:6px;padding:2px;flex:1}
+.seg button{flex:1;font-size:10.5px;padding:4px 0;border-radius:4px;color:var(--ink-3);transition:.1s}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow-sm)}
+.acct{display:flex;align-items:center;gap:9px;padding:8px 8px 4px;color:var(--ink-2);font-size:11.5px}
+.acct .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 18%,transparent)}
+
+/* ---------- 中栏 ---------- */
+.thread-list{width:360px;flex:none;background:var(--list);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.list-head{flex:none;height:52px;display:flex;align-items:center;padding:0 14px;gap:8px;border-bottom:1px solid var(--line)}
+.list-title{font-size:15px;font-weight:650;letter-spacing:.2px}
+.list-count{font-size:11px;color:var(--ink-3);margin-left:2px}
+.list-head .spacer{flex:1}
+.icon-btn{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:var(--ink-3);transition:.1s}
+.icon-btn:hover{background:var(--hover);color:var(--ink)}
+.icon-btn:active{transform:scale(.94)}
+.tabs{display:flex;gap:2px;padding:8px 10px;border-bottom:1px solid var(--line-soft);flex:none;overflow-x:auto}
+.tab{font-size:11px;padding:4px 10px;border-radius:20px;color:var(--ink-3);white-space:nowrap;transition:.1s}
+.tab:hover{background:var(--hover);color:var(--ink)}
+.tab.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:550}
+.threads{flex:1;overflow-y:auto;min-height:0}
+.thread{
+  position:relative;display:flex;gap:10px;padding:11px 14px 11px 16px;cursor:pointer;
+  border-bottom:1px solid var(--line-soft);transition:background .1s;
+}
+.thread:hover{background:var(--hover)}
+.thread.active{background:var(--selected)}
+.thread.archiving{animation:slideout .22s ease forwards}
+@keyframes slideout{to{opacity:0;transform:translateX(-16px);height:0;padding-top:0;padding-bottom:0}}
+.thread::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent}
+.thread.unread::before{background:var(--unread)}
+.avatar{
+  width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:11px;font-weight:650;color:#fff;letter-spacing:.3px;margin-top:1px;
+}
+.bubble{background:var(--chip);color:var(--ink-2)!important}
+.thread-body{flex:1;min-width:0}
+.thread-top{display:flex;align-items:baseline;gap:8px}
+.from{font-size:12.5px;color:var(--ink-2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread.unread .from{color:var(--ink);font-weight:680}
+.time{margin-left:auto;font-size:10.5px;color:var(--ink-3);white-space:nowrap;flex:none}
+.subject{font-size:12.5px;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread.unread .subject{font-weight:550}
+.preview{font-size:11.5px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
+.gtag{font-size:9.5px;padding:1px 6px;border-radius:4px;background:var(--chip);color:var(--ink-3)}
+.gtag.people{color:var(--accent-ink);background:var(--accent-soft)}
+.thread-actions{position:absolute;right:12px;bottom:9px;display:flex;gap:2px;opacity:0;transition:.1s}
+.thread:hover .thread-actions,.thread.active .thread-actions{opacity:1}
+.thread-actions .icon-btn{width:24px;height:24px;background:var(--card)}
+.star-on{color:#E0A526!important}
+.thread .star-inline{color:var(--ink-3);flex:none;margin-left:2px}
+/* 紧凑密度 */
+:root[data-density="compact"] .thread{padding-top:7px;padding-bottom:7px}
+:root[data-density="compact"] .preview{display:none}
+:root[data-density="compact"] .avatar{width:28px;height:28px;font-size:10px}
+:root[data-density="compact"] .thread-meta{margin-top:3px}
+
+/* ---------- 右栏 ---------- */
+.reading{flex:1;min-width:0;background:var(--paper-2);display:flex;flex-direction:column;min-height:0}
+.read-toolbar{height:52px;flex:none;display:flex;align-items:center;gap:2px;padding:0 18px;border-bottom:1px solid var(--line)}
+.read-toolbar .spacer{flex:1}
+.read-scroll{flex:1;overflow-y:auto;min-height:0}
+.read-inner{max-width:760px;margin:0 auto;padding:30px 40px 80px}
+.subject-big{font-size:24px;line-height:1.32;letter-spacing:-.2px;font-weight:680;margin-bottom:18px}
+.sender{display:flex;align-items:center;gap:11px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.sender .avatar{width:38px;height:38px;font-size:13px}
+.sender-info{flex:1;min-width:0}
+.sender-name{font-size:13px;font-weight:620}
+.sender-mail{font-size:11px;color:var(--ink-3)}
+.sender-right{text-align:right;font-size:11px;color:var(--ink-3)}
+.to-line{font-size:11px;color:var(--ink-3);margin-top:2px}
+/* 隐私条 */
+.privacy{margin:20px 0 26px;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow:hidden}
+.privacy-head{display:flex;align-items:center;gap:9px;padding:10px 13px;font-size:11.5px;color:var(--ink-2)}
+.privacy-head .shield{color:var(--ok);display:grid;place-items:center}
+.privacy-head b{color:var(--ink);font-weight:650}
+.privacy-head .more{margin-left:auto;font-size:10.5px;color:var(--accent-ink);display:flex;align-items:center;gap:3px}
+.privacy-detail{border-top:1px solid var(--line);padding:6px 13px 10px}
+.prow{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-soft)}
+.prow:last-child{border-bottom:0}
+.prow .domain{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink)}
+.prow .state{margin-left:auto;font-size:10px;padding:1px 7px;border-radius:10px;background:var(--chip);color:var(--ink-3)}
+.prow .state.blocked{color:var(--track);background:color-mix(in srgb,var(--track) 12%,transparent)}
+.prow .allow{font-size:10.5px;color:var(--accent-ink);border:1px solid var(--accent-soft);padding:2px 8px;border-radius:5px}
+.prow .allow:hover{background:var(--accent-soft)}
+/* 正文 */
+.mail-body{font-size:14px;line-height:1.78;color:var(--ink)}
+.mail-body.serif{font-family:"Songti SC","Noto Serif SC",Georgia,serif;font-size:15px;line-height:1.85}
+.mail-body p{margin:0 0 16px}
+.mail-body h3{font-size:14px;margin:22px 0 10px;font-weight:650}
+.mail-body ul{margin:0 0 16px;padding-left:22px}
+.mail-body li{margin-bottom:7px}
+.mail-body blockquote{border-left:3px solid var(--accent);padding:6px 0 6px 14px;margin:0 0 18px;color:var(--ink-2);background:linear-gradient(90deg,var(--accent-soft),transparent)}
+.mail-body a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+.mail-body .signature{margin-top:26px;color:var(--ink-2)}
+.attach{margin:24px 0 8px;display:flex;flex-wrap:wrap;gap:10px}
+.attach-card{width:210px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card);display:flex;align-items:center;gap:10px}
+.attach-ic{width:32px;height:32px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-size:9px;font-weight:700;flex:none}
+.attach-name{font-size:11.5px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.attach-size{font-size:10px;color:var(--ink-3)}
+.reply-box{display:flex;gap:10px;margin-top:32px;padding-top:22px;border-top:1px solid var(--line)}
+.reply-btn{display:flex;align-items:center;gap:7px;padding:8px 15px;border:1px solid var(--line);border-radius:7px;font-size:12px;color:var(--ink-2);background:var(--card);transition:.1s}
+.reply-btn:hover{border-color:var(--accent);color:var(--accent-ink)}
+.empty-read{height:100%;display:grid;place-items:center;text-align:center;color:var(--ink-3)}
+.empty-read .em-logo{width:52px;height:52px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:24px;font-weight:700;margin:0 auto 16px}
+
+/* ---------- 状态栏 ---------- */
+.statusbar{height:28px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;border-top:1px solid var(--line);background:var(--sidebar);font-size:10.5px;color:var(--ink-3)}
+.statusbar .sdot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:5px}
+.statusbar .spacer{flex:1}
+.statusbar .kbd{font-size:9px;padding:0 4px}
+
+/* ============ 浮层 ============ */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(15,17,20,.34);backdrop-filter:blur(3px);display:flex;justify-content:center;align-items:flex-start;padding-top:11vh;animation:fade .12s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+/* 命令面板 */
+.palette{width:min(600px,92vw);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:rise .16s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{transform:translateY(-10px) scale(.985);opacity:0}to{transform:none;opacity:1}}
+.pal-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.pal-input-wrap svg{color:var(--ink-3);flex:none}
+.pal-input{flex:1;border:0;outline:0;background:transparent;font-size:15px}
+.pal-input::placeholder{color:var(--ink-3)}
+.pal-list{max-height:360px;overflow-y:auto;padding:6px}
+.pal-item{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:7px;cursor:pointer}
+.pal-item.sel{background:var(--accent-soft)}
+.pal-item .pico{width:26px;height:26px;border-radius:6px;background:var(--chip);display:grid;place-items:center;color:var(--ink-2);flex:none}
+.pal-item.sel .pico{background:var(--card);color:var(--accent-ink)}
+.pal-item .pt{font-size:12.5px;font-weight:500}
+.pal-item .ph{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
+.pal-foot{border-top:1px solid var(--line);padding:8px 14px;display:flex;gap:14px;font-size:10px;color:var(--ink-3)}
+.pal-foot span{display:flex;align-items:center;gap:5px}
+/* 帮助 */
+.help{width:min(560px,92vw);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:rise .16s cubic-bezier(.2,.8,.2,1)}
+.help-head{padding:16px 20px;border-bottom:1px solid var(--line);font-size:14px;font-weight:650;display:flex;align-items:center}
+.help-body{padding:14px 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:8px 26px}
+.help-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:12px;color:var(--ink-2)}
+/* 写信 */
+.compose{width:min(680px,94vw);background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;animation:rise .16s cubic-bezier(.2,.8,.2,1);margin-top:4vh}
+.cmp-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;font-size:12.5px;font-weight:600}
+.cmp-head .spacer{flex:1}
+.cmp-field{display:flex;align-items:center;gap:12px;padding:9px 18px;border-bottom:1px solid var(--line-soft)}
+.cmp-field label{width:46px;font-size:11.5px;color:var(--ink-3);flex:none}
+.cmp-field input{flex:1;border:0;outline:0;background:transparent;font-size:13px}
+.cmp-area{width:100%;min-height:210px;border:0;outline:0;resize:vertical;padding:16px 18px;background:transparent;font-size:13.5px;line-height:1.7}
+.cmp-foot{border-top:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:14px}
+.cmp-opt{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.cmp-foot .spacer{flex:1}
+.btn-send{display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:600;transition:.1s}
+.btn-send:hover{filter:brightness(1.06)}
+.btn-send:active{transform:scale(.97)}
+select{font-family:inherit;font-size:11px;color:var(--ink-2);background:var(--chip);border:0;border-radius:5px;padding:4px 7px;outline:0}
+/* Toast */
+.toasts{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:9px;font-size:12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;animation:toastin .2s cubic-bezier(.2,.8,.2,1);white-space:nowrap}
+@keyframes toastin{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+.toast.out{animation:toastout .2s ease forwards}
+@keyframes toastout{to{transform:translateY(10px);opacity:0}}
+.toast button{color:var(--accent-ink);font-weight:650;font-size:12px}
+:root[data-theme="light"] .toast button{color:#9DB0FF}
+
+/* ===== Gmail · Material ===== */
+.brand-logo{background:#1A73E8;border-radius:6px;font-weight:500}
+/* 写邮件主按钮（原顶栏并入左栏） */
+.compose-main{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  height:38px;margin:0 4px 16px;padding:0 14px;flex:none;
+  border-radius:20px;background:var(--accent);color:#fff;
+  font-size:12.5px;font-weight:650;letter-spacing:.2px;
+  box-shadow:0 1px 3px rgba(26,115,232,.3);transition:.14s;
+}
+.compose-main:hover{filter:brightness(1.07);box-shadow:0 3px 10px rgba(26,115,232,.35)}
+.compose-main:active{transform:scale(.98)}
+/* 列表内搜索框（原顶栏并入中栏） */
+.list-search{
+  flex:none;display:flex;align-items:center;gap:8px;
+  height:32px;margin:0 10px 8px;padding:0 11px;
+  border-radius:18px;background:var(--chip);border:1px solid transparent;
+  color:var(--ink-3);transition:.14s;
+}
+.list-search:focus-within{background:var(--card);border-color:var(--accent);box-shadow:0 1px 6px rgba(32,33,36,.12)}
+.list-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:12px;color:var(--ink)}
+.list-search input::placeholder{color:var(--ink-3)}
+.list-search .kbd{font-size:9px;padding:0 5px}
+.list-head{height:44px}
+.thread{border-radius:0 20px 20px 0;padding:12px 16px 12px 18px;margin-right:8px}
+.thread.active{background:var(--selected)}
+.thread::before{width:3px}
+.thread .avatar{width:30px;height:30px;font-size:11px}
+.preview{font-size:11.5px}
+.gtag{border-radius:4px;background:var(--chip)}
+.subject-big{font-size:23px;font-weight:500}
+.read-inner{max-width:760px;padding-top:26px}
+.privacy{border-radius:8px}
+.reply-btn,.btn-send{border-radius:20px}
+.palette,.compose,.help{border-radius:10px}
+.compose .btn-send{padding:9px 22px}
+
+@media(max-width:1100px){.thread-list{width:340px}.sidebar{width:210px}}
+@media(max-width:860px){.sidebar{display:none}.read-inner{padding:24px 22px 60px}}
+/* 顶栏移除后，让内容区从顶部开始 */
+.app>.workspace{flex:1}
+
+</style>
+</head>
+<body>
+
+<!-- ===== 图标定义 ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<g id="i-search"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g>
+<g id="i-inbox"><path d="M3 12l3-7h12l3 7v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 12h5l1.5 3h5L16 12h5"/></g>
+<g id="i-user"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></g>
+<g id="i-bell"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></g>
+<g id="i-rss"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 5a15 15 0 0 1 15 15"/><circle cx="5" cy="19" r="1.5"/></g>
+<g id="i-star"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6-5.4-2.8-5.4 2.8 1-6L3.2 9.5l6.1-.9z"/></g>
+<g id="i-clock"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g>
+<g id="i-archive"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/></g>
+<g id="i-settings"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-4l-.3 2.6a7 7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.7 1l.3 2.6h4l.3-2.6a7 7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></g>
+<g id="i-plus"><path d="M12 5v14M5 12h14"/></g>
+<g id="i-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></g>
+<g id="i-moon"><path d="M20 15a8 8 0 0 1-11-11 8 8 0 1 0 11 11z"/></g>
+<g id="i-rows"><path d="M4 6h16M4 12h16M4 18h16"/></g>
+<g id="i-reply"><path d="M9 7L4 12l5 5"/><path d="M4 12h9a6 6 0 0 1 6 6v1"/></g>
+<g id="i-replyall"><path d="M7 7L2 12l5 5M12 7l-5 5 5 5"/><path d="M7 12h8a6 6 0 0 1 6 6v1"/></g>
+<g id="i-forward"><path d="M15 7l5 5-5 5"/><path d="M20 12h-9a6 6 0 0 0-6 6v1"/></g>
+<g id="i-trash"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></g>
+<g id="i-shield"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></g>
+<g id="i-chevron"><path d="M6 9l6 6 6-6"/></g>
+<g id="i-send"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></g>
+<g id="i-cmd"><path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/></g>
+<g id="i-x"><path d="M6 6l12 12M18 6L6 18"/></g>
+<g id="i-paperclip"><path d="M21 11l-8.5 8.5a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></g>
+<g id="i-keyboard"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/></g>
+</defs>
+</svg>
+
+<div class="app">
+  <div class="workspace">
+    <!-- 左栏 -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">F</div>
+        <div><div class="brand-name">Fold</div><div class="brand-sub">折页 · 安静邮件台</div></div>
+      </div>
+      <button class="compose-main" id="composeBtn" title="写邮件 (c)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-plus"/></svg> 写邮件</button>
+      <div class="nav-group">
+        <div class="nav-label">空间</div>
+        <button class="nav-item active" data-folder="inbox"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><use href="#i-inbox"/></svg>全部收件箱<span class="nav-count" id="cnt-inbox">0</span></button>
+        <button class="nav-item" data-folder="people"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-user"/></svg>人<span class="nav-count" id="cnt-people">0</span></button>
+        <button class="nav-item" data-folder="notification"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-bell"/></svg>通知<span class="nav-count" id="cnt-notification">0</span></button>
+        <button class="nav-item" data-folder="newsletter"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-rss"/></svg>订阅<span class="nav-count" id="cnt-newsletter">0</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">整理</div>
+        <button class="nav-item" data-folder="starred"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><use href="#i-star"/></svg>星标<span class="nav-count" id="cnt-starred">0</span></button>
+        <button class="nav-item" data-folder="later"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-clock"/></svg>稍后处理<span class="nav-count" id="cnt-later">0</span></button>
+        <button class="nav-item" data-folder="archive"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><use href="#i-archive"/></svg>归档<span class="nav-count" id="cnt-archive">0</span></button>
+      </div>
+      <div class="sidebar-foot">
+        <div class="foot-row">
+          <div class="seg" id="densitySeg">
+            <button data-density="comfortable" class="on">舒适</button>
+            <button data-density="compact">紧凑</button>
+          </div>
+          <button class="icon-btn" id="fontBtn" title="正文衬线字体"><span style="font-family:Georgia,serif;font-size:15px">Aa</span></button>
+          <button class="icon-btn" id="themeBtn" title="切换明暗主题"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-sun" id="themeIcon"/></svg></button>
+          <button class="icon-btn" id="helpBtn" title="快捷键 (?)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-keyboard"/></svg></button>
+        </div>
+        <div class="acct"><span class="dot"></span>oliver@fold.dev<span style="margin-left:auto;color:var(--ink-3)">2 账号</span></div>
+      </div>
+    </aside>
+
+    <!-- 中栏 -->
+    <section class="thread-list">
+      <div class="list-head">
+        <span class="list-title" id="listTitle">全部收件箱</span>
+        <span class="list-count" id="listCount"></span>
+        <span class="spacer"></span>
+        <button class="icon-btn" id="paletteBtn" title="命令面板 ⌘K"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><use href="#i-cmd"/></svg></button>
+      </div>
+      <div class="list-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-search"/></svg>
+        <input id="searchInput" placeholder="搜索邮件、发件人、附件…" autocomplete="off">
+        <span class="kbd" id="searchKbd">/</span>
+      </div>
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-tab="all">全部</button>
+        <button class="tab" data-tab="people">人</button>
+        <button class="tab" data-tab="notification">通知</button>
+        <button class="tab" data-tab="newsletter">订阅</button>
+      </div>
+      <div class="threads" id="threads"></div>
+    </section>
+
+    <!-- 右栏 -->
+    <main class="reading">
+      <div class="read-toolbar" id="readToolbar">
+        <button class="icon-btn" data-act="archive" title="归档 (e)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><use href="#i-archive"/></svg></button>
+        <button class="icon-btn" data-act="delete" title="删除"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-trash"/></svg></button>
+        <button class="icon-btn" data-act="star" title="星标 (s)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><use href="#i-star"/></svg></button>
+        <button class="icon-btn" data-act="later" title="稍后处理"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><use href="#i-clock"/></svg></button>
+        <span class="spacer"></span>
+        <button class="icon-btn" data-act="reply" title="回复 (r)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-reply"/></svg></button>
+        <button class="icon-btn" data-act="replyall" title="全部回复 (a)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-replyall"/></svg></button>
+        <button class="icon-btn" data-act="forward" title="转发 (f)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-forward"/></svg></button>
+      </div>
+      <div class="read-scroll" id="readScroll"></div>
+    </main>
+  </div>
+
+  <!-- 状态栏 -->
+  <footer class="statusbar">
+    <span><span class="sdot"></span>已同步 10:24</span>
+    <span id="unreadStatus">2 封未读</span>
+    <span class="spacer"></span>
+    <span><span class="kbd">j</span><span class="kbd">k</span> 移动</span>
+    <span><span class="kbd">↵</span> 打开</span>
+    <span><span class="kbd">e</span> 归档</span>
+    <span><span class="kbd">u</span> 撤销</span>
+    <span><span class="kbd">⌘K</span> 命令</span>
+  </footer>
+</div>
+
+<!-- 命令面板 -->
+<div class="overlay hidden" id="paletteOverlay">
+  <div class="palette">
+    <div class="pal-input-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-search"/></svg>
+      <input class="pal-input" id="palInput" placeholder="输入命令，或搜索邮件…" autocomplete="off">
+    </div>
+    <div class="pal-list" id="palList"></div>
+    <div class="pal-foot"><span><span class="kbd">↑↓</span> 选择</span><span><span class="kbd">↵</span> 执行</span><span><span class="kbd">esc</span> 关闭</span></div>
+  </div>
+</div>
+
+<!-- 快捷键帮助 -->
+<div class="overlay hidden" id="helpOverlay">
+  <div class="help">
+    <div class="help-head">键盘快捷键 <button class="icon-btn" id="helpClose" style="margin-left:auto"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-x"/></svg></button></div>
+    <div class="help-body" id="helpBody"></div>
+  </div>
+</div>
+
+<!-- 写信浮层 -->
+<div class="overlay hidden" id="composeOverlay">
+  <div class="compose">
+    <div class="cmp-head">新邮件 <span class="spacer"></span><button class="icon-btn" id="cmpClose"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-x"/></svg></button></div>
+    <div class="cmp-field"><label>收件人</label><input id="cmpTo" placeholder="name@example.com"></div>
+    <div class="cmp-field"><label>主题</label><input id="cmpSubject" placeholder="邮件主题"></div>
+    <textarea class="cmp-area" id="cmpBody" placeholder="写点什么…"></textarea>
+    <div class="cmp-foot">
+      <button class="cmp-opt" id="attachBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><use href="#i-paperclip"/></svg> 附件</button>
+      <label class="cmp-opt">发送时间 <select id="cmpSendTime"><option>立即发送</option><option>明早 09:00</option><option>下周一 09:00</option></select></label>
+      <label class="cmp-opt"><input type="checkbox" id="cmpUndo" checked> 发送后 10 秒可撤销</label>
+      <span class="spacer"></span>
+      <button class="btn-send" id="cmpSend"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><use href="#i-send"/></svg> 发送</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ==================== 数据 ==================== */
+const COLORS = ['#5B7CFA','#E27D60','#3BA78B','#9B6DC4','#D08A3E','#4C8FD0','#C25B80','#6B8E4E'];
+const mails = [
+  {id:1, group:'people', from:'Alice Chen', email:'alice@studio.design', initials:'AC', color:COLORS[0],
+   subject:'项目进展 · 周五前给一版', preview:'周五前能给一版吗？包含移动端和交互说明，我会把标注补进 Figma。',
+   time:'10:23', date:'今天 10:23', unread:true, starred:false, later:false, archived:false,
+   blocked:3, links:2,
+   body:`<p>嗨，</p><p>周五前能给一版吗？包含移动端和交互说明，我会把标注补进 Figma。这版主要先对齐信息架构，视觉细节我们可以后面再磨。</p><p>另外有两个点想先跟你确认：</p><ul><li>收件箱默认切成「人 / 通知 / 订阅」三栏，这个分组逻辑你觉得合适吗？</li><li>隐私报告的展示位置——放在正文顶部，会不会打扰阅读？我在犹豫要不要做成可折叠的。</li></ul><blockquote>我们把阅读体验放在第一位，任何提示都不该盖过正文本身。</blockquote><p>如果没问题我就按这个方向推进了。辛苦！</p><p class="signature">— Alice<br><span style="color:var(--ink-3)">Product Design · Studio</span></p>`,
+   attachments:[{n:'fold-flow-v3.fig',s:'2.4 MB'},{n:'移动端标注.pdf',s:'860 KB'}]},
+  {id:2, group:'people', from:'Bob Wang', email:'bob.wang@northwind.io', initials:'BW', color:COLORS[1],
+   subject:'Re: 合同条款确认', preview:'附件是法务改过的版本，重点看第 7 条关于数据处理的部分。',
+   time:'09:15', date:'今天 09:15', unread:true, starred:true, later:false, archived:false,
+   blocked:0, links:0,
+   body:`<p>你好，</p><p>附件是法务改过的版本，重点看第 <strong>7 条</strong>关于数据处理的部分——他们把数据留存期限从 90 天改成了 30 天，这个变更对我们有利，应该没问题。</p><p>另外第 12 条的自动续约条款，建议加一个提前 30 天的书面通知期。你看要不要我直接回复对方？</p><p class="signature">Bob</p>`,
+   attachments:[{n:'contract-v7-redline.docx',s:'148 KB'}]},
+  {id:3, group:'notification', from:'GitHub', email:'notifications@github.com', initials:'GH', color:COLORS[5],
+   subject:'[fold-mail] CI passed on main', preview:'Build #247 succeeded · 3 minutes ago · all 128 tests passed',
+   time:'08:52', date:'今天 08:52', unread:true, starred:false, later:false, archived:false,
+   blocked:2, links:5,
+   body:`<p><strong>Build #247 succeeded</strong> on <code>main</code></p><p>All 128 tests passed in 1m 42s. Coverage: 87.4% (+0.6%).</p><h3>Changes</h3><ul><li>core: 全文索引支持附件名过滤</li><li>ui: 隐私报告展开动画</li><li>fix: 修复 IMAP IDLE 心跳在弱网下重连</li></ul><p style="color:var(--ink-3);font-size:12px">This email was sent because you are watching this repository.</p>`,
+   attachments:[]},
+  {id:4, group:'people', from:'林晓', email:'linxiao@gmail.com', initials:'林', color:COLORS[3],
+   subject:'这周末有空吗？', preview:'好久没见了，听说你最近在做一个邮件客户端？周末一起吃个饭聊聊。',
+   time:'昨天', date:'昨天 21:40', unread:false, starred:false, later:true, archived:false,
+   blocked:1, links:0,
+   body:`<p>好久没见了！听说你最近在做一个邮件客户端，挺好奇的。周末一起吃个饭聊聊？</p><p>周六下午我都有空，地方你来定 ☕</p><p class="signature">林晓</p>`,
+   attachments:[]},
+  {id:5, group:'newsletter', from:'The Pragmatic Engineer', email:'newsletter@pragmaticengineer.com', initials:'PE', color:COLORS[4],
+   subject:'Issue #142 · The anatomy of a great developer tool', preview:'What makes a developer tool feel "great"? It is not just speed — it is respect for the user',
+   time:'昨天', date:'昨天 08:10', unread:false, starred:false, later:false, archived:false,
+   blocked:4, links:9,
+   body:`<p>Great developer tools share a quality that is hard to name: they feel <em>quiet</em>. They do not interrupt. They respect your attention.</p><h3>Three principles</h3><ul><li><strong>Speed is a feature</strong> — but perceived speed matters more than raw benchmarks.</li><li><strong>Keyboard first, mouse never punished</strong> — every action has a shortcut, but nothing is hidden behind one.</li><li><strong>Local first</strong> — the tool should work when the network does not.</li></ul><p>This week, we look at how the best tools in the ecosystem put these into practice.</p><p style="color:var(--ink-3);font-size:12px">You are receiving this because you subscribed. <a href="#">Unsubscribe</a></p>`,
+   attachments:[]},
+  {id:6, group:'notification', from:'Vercel', email:'notifications@vercel.com', initials:'V', color:COLORS[7],
+   subject:'Deployment ready · fold-mail.vercel.app', preview:'Your deployment is live. Build completed in 42s with 0 errors.',
+   time:'昨天', date:'昨天 07:33', unread:false, starred:false, later:false, archived:false,
+   blocked:1, links:3,
+   body:`<p><strong>Your deployment is live.</strong></p><p>Build completed in 42s with 0 errors. All checks passed.</p><p style="color:var(--ink-3);font-size:12px">Deployment · fold-mail · main · 4f2c9ad</p>`,
+   attachments:[]},
+  {id:7, group:'people', from:'Marcus Lee', email:'marcus@rustlang.cn', initials:'ML', color:COLORS[2],
+   subject:'Rust 异步编程的一些思考', preview:'看完你发的那篇 tokio 源码解析，有几个想法想讨论一下，尤其是关于……',
+   time:'周一', date:'周一 16:20', unread:false, starred:true, later:false, archived:false,
+   blocked:0, links:1,
+   body:`<p>看完你发的那篇 tokio 源码解析，有几个想法想讨论一下。</p><p>尤其是关于 <code>waker</code> 在跨线程唤醒时的内存序问题——我认为在 <code>ArcWake</code> 里用 <code>Release/Acquire</code> 就够了，不需要 SeqCst。你怎么看？</p><p class="signature">Marcus</p>`,
+   attachments:[]},
+  {id:8, group:'newsletter', from:'少数派', email:'weekly@sspai.com', initials:'少', color:COLORS[6],
+   subject:'本周精选：把注意力还给阅读', preview:'5 款值得关注的效率工具，以及我们如何使用它们重建工作流',
+   time:'周一', date:'周一 09:00', unread:false, starred:false, later:false, archived:false,
+   blocked:3, links:12,
+   body:`<p>本期我们聊聊「注意力」这个话题：工具越来越多，但真正让人专注的却越来越少。</p><h3>本周推荐</h3><ul><li>一款本地优先的邮件客户端</li><li>一个纯文本的知识管理工具</li><li>三款帮你关掉通知的小工具</li></ul><p style="color:var(--ink-3);font-size:12px">退订请点击页尾链接。</p>`,
+   attachments:[]},
+  {id:9, group:'notification', from:'支付宝', email:'info@alipay.com', initials:'支', color:COLORS[0],
+   subject:'账单提醒：您有一笔新的支出', preview:'11 月 16 日 支出 ¥128.00 · 商户：云端咖啡',
+   time:'周一', date:'周一 08:12', unread:false, starred:false, later:false, archived:false,
+   blocked:2, links:1,
+   body:`<p>您的账户于 <strong>11 月 16 日 14:32</strong> 有一笔支出：</p><ul><li>金额：<strong>¥128.00</strong></li><li>商户：云端咖啡</li><li>支付方式：余额宝</li></ul><p style="color:var(--ink-3);font-size:12px">如非本人操作，请及时联系客服。</p>`,
+   attachments:[]},
+  {id:10, group:'people', from:'团队周会', email:'team@fold.dev', initials:'团', color:COLORS[5],
+   subject:'Standup notes · 11/17', preview:'本周进展：搜索索引性能提升 3x；阻塞项：Autocrypt 兼容性测试',
+   time:'上周五', date:'上周五 18:05', unread:false, starred:false, later:false, archived:true,
+   blocked:0, links:0,
+   body:`<h3>本周进展</h3><ul><li>全文索引性能提升约 3x（Tantivy 配置调优）</li><li>命令面板完成，支持模糊搜索</li></ul><h3>阻塞项</h3><ul><li>Autocrypt 与主流客户端的兼容性测试尚未开始</li></ul><p class="signature">— Fold Team</p>`,
+   attachments:[]}
+];
+
+/* ==================== 状态 ==================== */
+const state = {
+  folder:'inbox', tab:'all', query:'', selected:null,
+  density:'comfortable', serif:false,
+  undoStack:[], palIdx:0, palItems:[]
+};
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ==================== 过滤逻辑 ==================== */
+function visibleMails(){
+  let list = state.folder==='archive'
+    ? mails.filter(m=>m.archived&&!m.deleted)
+    : mails.filter(m=>!m.archived&&!m.deleted);
+  if(state.folder==='people'||state.folder==='notification'||state.folder==='newsletter') list = list.filter(m=>m.group===state.folder);
+  else if(state.folder==='starred') list = list.filter(m=>m.starred);
+  else if(state.folder==='later') list = list.filter(m=>m.later);
+  if(state.tab!=='all' && state.folder==='inbox') list = list.filter(m=>m.group===state.tab);
+  if(state.query){
+    const q = state.query.toLowerCase();
+    list = list.filter(m=>[m.from,m.email,m.subject,m.preview].some(x=>x.toLowerCase().includes(q)));
+  }
+  return list;
+}
+const folderNames = {inbox:'全部收件箱',people:'人',notification:'通知',newsletter:'订阅',starred:'星标',later:'稍后处理',archive:'归档'};
+
+/* ==================== 渲染 ==================== */
+function renderCounts(){
+  const unread = m=>m.unread;
+  const active = mails.filter(m=>!m.archived&&!m.deleted);
+  $('#cnt-inbox').textContent = active.filter(unread).length;
+  $('#cnt-people').textContent = active.filter(m=>m.group==='people'&&unread(m)).length;
+  $('#cnt-notification').textContent = active.filter(m=>m.group==='notification'&&unread(m)).length;
+  $('#cnt-newsletter').textContent = active.filter(m=>m.group==='newsletter'&&unread(m)).length;
+  $('#cnt-starred').textContent = active.filter(m=>m.starred).length;
+  $('#cnt-later').textContent = active.filter(m=>m.later).length;
+  $('#cnt-archive').textContent = mails.filter(m=>m.archived).length;
+  const totalUnread = active.filter(unread).length;
+  $('#unreadStatus').textContent = totalUnread+' 封未读';
+}
+function renderNav(){
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.folder===state.folder));
+  $('#listTitle').textContent = state.query ? '搜索结果' : folderNames[state.folder];
+}
+function renderList(){
+  const list = visibleMails();
+  $('#listCount').textContent = list.length ? list.length+' 封' : '';
+  const box = $('#threads');
+  if(!list.length){
+    box.innerHTML = `<div class="empty-read" style="padding:60px 20px"><div><div style="font-size:26px;margin-bottom:8px">✦</div><div>这里空空如也</div></div></div>`;
+    return;
+  }
+  box.innerHTML = list.map(m=>{
+    const av = m.initials ? `<div class="avatar" style="background:${m.color}">${esc(m.initials)}</div>` : `<div class="avatar bubble">?</div>`;
+    return `<div class="thread ${m.unread?'unread':''} ${state.selected===m.id?'active':''}" data-id="${m.id}">
+      ${av}
+      <div class="thread-body">
+        <div class="thread-top"><span class="from">${esc(m.from)}</span><span class="time">${esc(m.time)}</span></div>
+        <div class="subject">${esc(m.subject)} ${m.starred?'<span class="star-inline">★</span>':''}</div>
+        <div class="preview">${esc(m.preview)}</div>
+        <div class="thread-meta"><span class="gtag ${m.group}">${{people:'人',notification:'通知',newsletter:'订阅'}[m.group]}</span>${m.later?'<span class="gtag">稍后</span>':''}</div>
+      </div>
+      <div class="thread-actions">
+        <button class="icon-btn act-star ${m.starred?'star-on':''}" title="星标"><svg width="13" height="13" viewBox="0 0 24 24" fill="${m.starred?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><use href="#i-star"/></svg></button>
+        <button class="icon-btn act-archive" title="归档"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><use href="#i-archive"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderRead(){
+  const m = mails.find(x=>x.id===state.selected);
+  const box = $('#readScroll');
+  if(!m){
+    box.innerHTML = `<div class="empty-read"><div><div class="em-logo">F</div><div style="font-size:14px;color:var(--ink-2)">选一封邮件开始阅读</div><div style="font-size:11px;margin-top:6px">j / k 移动 · ↵ 打开 · ⌘K 命令</div></div></div>`;
+    $$('#readToolbar .icon-btn').forEach(b=>b.style.opacity='.4');
+    return;
+  }
+  $$('#readToolbar .icon-btn').forEach(b=>b.style.opacity='1');
+  const starBtn = $('[data-act="star"]');
+  starBtn.style.color = m.starred ? '#E0A526' : '';
+  const av = m.color ? `<div class="avatar" style="background:${m.color}">${esc(m.initials)}</div>` : `<div class="avatar bubble">?</div>`;
+  const privacy = (m.blocked||m.links) ? `
+    <div class="privacy">
+      <div class="privacy-head">
+        <span class="shield"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><use href="#i-shield"/></svg></span>
+        <span>已拦截 <b>${m.blocked}</b> 个追踪像素 · <b>${m.links}</b> 个外部链接</span>
+        <button class="more" id="privacyToggle">查看详情 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-chevron"/></svg></button>
+      </div>
+      <div class="privacy-detail hidden" id="privacyDetail">
+        <div class="prow"><span class="domain">tracker.google-analytics.com</span><span class="state blocked">已拦截</span><button class="allow">允许此域名</button></div>
+        <div class="prow"><span class="domain">pixel.facebook.com</span><span class="state blocked">已拦截</span><button class="allow">允许此域名</button></div>
+        <div class="prow"><span class="domain">cdn.reader-metrics.io</span><span class="state">外部图片</span><button class="allow">加载图片</button></div>
+      </div>
+    </div>` : '';
+  const attachments = m.attachments&&m.attachments.length ? `<div class="attach">${m.attachments.map(a=>`
+    <div class="attach-card"><div class="attach-ic">${a.n.split('.').pop().slice(0,4).toUpperCase()}</div><div style="min-width:0"><div class="attach-name">${esc(a.n)}</div><div class="attach-size">${esc(a.s)}</div></div></div>`).join('')}</div>`:'';
+  box.innerHTML = `<div class="read-inner">
+    <div class="subject-big">${esc(m.subject)}</div>
+    <div class="sender">
+      ${av}
+      <div class="sender-info"><div class="sender-name">${esc(m.from)} <span style="color:var(--ink-3);font-weight:400">&lt;${esc(m.email)}&gt;</span></div><div class="to-line">发送至 我 · ${m.group==='notification'?'通知':'收件箱'}</div></div>
+      <div class="sender-right">${esc(m.date)}</div>
+    </div>
+    ${privacy}
+    <div class="mail-body ${state.serif?'serif':''}">${m.body}</div>
+    ${attachments}
+    <div class="reply-box">
+      <button class="reply-btn" data-reply="reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-reply"/></svg> 回复</button>
+      <button class="reply-btn" data-reply="replyall"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-replyall"/></svg> 全部回复</button>
+      <button class="reply-btn" data-reply="forward"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-forward"/></svg> 转发</button>
+    </div>
+  </div>`;
+  const t = $('#privacyToggle');
+  if(t) t.onclick = ()=>{ const d=$('#privacyDetail'); d.classList.toggle('hidden'); t.innerHTML = (d.classList.contains('hidden')?'查看详情 ':'收起 ')+'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><use href="#i-chevron"/></svg>'; };
+  $$('.prow .allow').forEach(b=>b.onclick=()=>{ b.closest('.prow').querySelector('.state').textContent='已允许'; b.closest('.prow').querySelector('.state').className='state'; b.textContent='已允许'; b.disabled=true; toast('已将该域名加入允许列表'); });
+  $$('.reply-btn').forEach(b=>b.onclick=()=>openCompose(b.dataset.reply));
+}
+function renderAll(){ renderNav(); renderCounts(); renderList(); renderRead(); }
+
+/* ==================== 交互 ==================== */
+function selectMail(id, markRead=true){
+  state.selected = id;
+  if(markRead){ const m=mails.find(x=>x.id===id); if(m&&m.unread){m.unread=false;} }
+  renderList(); renderRead(); renderCounts();
+  const el = $(`.thread[data-id="${id}"]`);
+  if(el) el.scrollIntoView({block:'nearest'});
+}
+function move(delta){
+  const list = visibleMails();
+  if(!list.length) return;
+  let i = list.findIndex(m=>m.id===state.selected);
+  i = i<0 ? (delta>0?0:list.length-1) : Math.min(list.length-1,Math.max(0,i+delta));
+  selectMail(list[i].id,false);
+}
+function toast(msg, undoFn){
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML = `<span>${esc(msg)}</span>${undoFn?'<button>撤销</button>':''}`;
+  if(undoFn) t.querySelector('button').onclick=()=>{undoFn(); t.remove();};
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),200);}, undoFn?5000:2600);
+}
+function doAction(act){
+  const m = mails.find(x=>x.id===state.selected);
+  if(!m) return;
+  if(act==='star'){ m.starred=!m.starred; toast(m.starred?'已加星标':'已取消星标'); renderAll(); return; }
+  if(act==='later'){ m.later=!m.later; toast(m.later?'已移到稍后处理':'已移出稍后处理'); renderAll(); return; }
+  if(act==='archive'||act==='delete'){
+    const wasArchived=m.archived, wasDeleted=m.deleted;
+    if(act==='archive') m.archived=true; else m.deleted=true;
+    const list=visibleMails(); const idx=list.findIndex(x=>x.id===m.id);
+    const prev=list[idx+1]||list[idx-1];
+    const el=$(`.thread[data-id="${m.id}"]`); if(el) el.classList.add('archiving');
+    state.undoStack.push({type:act,m,wasArchived,wasDeleted});
+    toast(act==='archive'?'已归档':'已删除', ()=>{m.archived=wasArchived; m.deleted=wasDeleted; renderAll(); selectMail(m.id,false);});
+    setTimeout(()=>{ state.selected = prev?prev.id:null; renderAll(); },200);
+    return;
+  }
+  if(['reply','replyall','forward'].includes(act)){ openCompose(act); }
+}
+
+/* ---- 命令面板 ---- */
+const commands = [
+  {t:'写新邮件',h:'c',ico:'i-plus',run:()=>openCompose('new')},
+  {t:'搜索邮件',h:'/',ico:'i-search',run:()=>{setTimeout(()=>$('#searchInput').focus(),50)}},
+  {t:'切换到 全部收件箱',h:'g i',ico:'i-inbox',run:()=>setFolder('inbox')},
+  {t:'切换到 人',h:'g p',ico:'i-user',run:()=>setFolder('people')},
+  {t:'切换到 通知',h:'g n',ico:'i-bell',run:()=>setFolder('notification')},
+  {t:'切换到 订阅',h:'g s',ico:'i-rss',run:()=>setFolder('newsletter')},
+  {t:'切换到 星标',h:'',ico:'i-star',run:()=>setFolder('starred')},
+  {t:'切换到 稍后处理',h:'',ico:'i-clock',run:()=>setFolder('later')},
+  {t:'切换到 归档',h:'',ico:'i-archive',run:()=>setFolder('archive')},
+  {t:'切换明暗主题',h:'',ico:'i-moon',run:toggleTheme},
+  {t:'切换紧凑 / 舒适',h:'',ico:'i-rows',run:toggleDensity},
+  {t:'切换正文衬线字体',h:'',ico:'i-keyboard',run:toggleSerif},
+  {t:'查看快捷键',h:'?',ico:'i-keyboard',run:()=>$('#helpOverlay').classList.remove('hidden')},
+  {t:'全部标为已读',h:'',ico:'i-inbox',run:()=>{mails.forEach(m=>{if(!m.archived)m.unread=false});renderAll();toast('已将全部邮件标为已读')}}
+];
+function renderPalette(){
+  const q=$('#palInput').value.trim().toLowerCase();
+  let items = commands.filter(c=>c.t.toLowerCase().includes(q));
+  if(q && items.length<3){
+    const found = mails.filter(m=>[m.from,m.subject,m.preview].some(x=>x.toLowerCase().includes(q))).slice(0,5);
+    items = [...items, ...found.map(m=>({t:'搜索：'+m.subject,h:m.from,ico:'i-search',run:()=>{closePalette();$('#searchInput').value=q;state.query=q;renderAll();selectMail(m.id)}}))];
+  }
+  state.palItems=items; state.palIdx=Math.min(state.palIdx,Math.max(0,items.length-1));
+  $('#palList').innerHTML = items.length? items.map((c,i)=>`<div class="pal-item ${i===state.palIdx?'sel':''}" data-i="${i}"><span class="pico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#${c.ico}"/></svg></span><span class="pt">${esc(c.t)}</span><span class="ph">${esc(c.h||'')}</span></div>`).join('') : `<div style="padding:24px;text-align:center;color:var(--ink-3);font-size:12px">没有匹配的命令</div>`;
+  $$('.pal-item').forEach(el=>{el.onmouseenter=()=>{state.palIdx=+el.dataset.i;$$('.pal-item').forEach(x=>x.classList.remove('sel'));el.classList.add('sel')};el.onclick=()=>execPal(+el.dataset.i)});
+}
+function execPal(i){ const c=state.palItems[i]; if(!c)return; closePalette(); c.run(); }
+function openPalette(){ $('#paletteOverlay').classList.remove('hidden'); $('#palInput').value=''; state.palIdx=0; renderPalette(); setTimeout(()=>$('#palInput').focus(),30); }
+function closePalette(){ $('#paletteOverlay').classList.add('hidden'); }
+
+/* ---- 写信 ---- */
+function openCompose(mode){
+  const m=mails.find(x=>x.id===state.selected);
+  $('#cmpTo').value = mode==='reply'&&m?m.email:'';
+  $('#cmpSubject').value = m?(mode==='forward'?'Fwd: ':'Re: ')+m.subject:'';
+  $('#cmpBody').value='';
+  $('#composeOverlay').classList.remove('hidden');
+  setTimeout(()=>$('#cmpTo').focus(),30);
+}
+function closeCompose(){ $('#composeOverlay').classList.add('hidden'); }
+function sendMail(){
+  const to=$('#cmpTo').value.trim();
+  if(!to){ toast('请填写收件人'); $('#cmpTo').focus(); return; }
+  const when=$('#cmpSendTime').value, canUndo=$('#cmpUndo').checked;
+  closeCompose();
+  toast(when==='立即发送'?'邮件已发送':'已定时为 '+when, canUndo?()=>toast('已撤回发送'):null);
+}
+
+/* ---- 主题 / 密度 ---- */
+function toggleTheme(){
+  const root=document.documentElement;
+  const dark=root.dataset.theme==='dark';
+  root.dataset.theme=dark?'light':'dark';
+  $('#themeIcon').setAttribute('href',dark?'#i-sun':'#i-moon');
+  try{localStorage.setItem('fold-theme-gmail',root.dataset.theme)}catch(e){}
+}
+function toggleDensity(){
+  const root=document.documentElement;
+  const next=root.dataset.density==='compact'?'comfortable':'compact';
+  setDensity(next);
+}
+function setDensity(d){
+  document.documentElement.dataset.density=d;
+  $$('#densitySeg button').forEach(b=>b.classList.toggle('on',b.dataset.density===d));
+  try{localStorage.setItem('fold-density-gmail',d)}catch(e){}
+}
+function toggleSerif(){ state.serif=!state.serif; renderRead(); toast(state.serif?'已切换衬线字体':'已切换无衬线字体'); }
+function setFolder(f){ state.folder=f; state.tab='all'; $$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab==='all')); renderAll(); }
+
+/* ---- 事件绑定 ---- */
+$$('.nav-item').forEach(n=>n.onclick=()=>setFolder(n.dataset.folder));
+$$('.tab').forEach(t=>t.onclick=()=>{state.tab=t.dataset.tab;$$('.tab').forEach(x=>x.classList.toggle('on',x===t));renderList()});
+$('#threads').addEventListener('click',e=>{
+  const star=e.target.closest('.act-star');
+  if(star){e.stopPropagation();const id=+star.closest('.thread').dataset.id;const m=mails.find(x=>x.id===id);m.starred=!m.starred;renderAll();return;}
+  const arc=e.target.closest('.act-archive');
+  if(arc){e.stopPropagation();const id=+arc.closest('.thread').dataset.id;state.selected=id;doAction('archive');return;}
+  const t=e.target.closest('.thread'); if(t) selectMail(+t.dataset.id);
+});
+$$('#readToolbar .icon-btn').forEach(b=>b.onclick=()=>doAction(b.dataset.act));
+$('#paletteBtn').onclick=openPalette;
+$('#themeBtn').onclick=toggleTheme;
+$('#helpBtn').onclick=()=>$('#helpOverlay').classList.remove('hidden');
+$('#helpClose').onclick=()=>$('#helpOverlay').classList.add('hidden');
+$('#composeBtn').onclick=()=>openCompose('new');
+$('#cmpClose').onclick=closeCompose;
+$('#cmpSend').onclick=sendMail;
+$('#attachBtn').onclick=()=>toast('原型演示：附件拖拽入口');
+$('#fontBtn').onclick=toggleSerif;
+$$('#densitySeg button').forEach(b=>b.onclick=()=>setDensity(b.dataset.density));
+$('#searchInput').addEventListener('input',e=>{state.query=e.target.value.trim();renderAll();});
+$('#palInput').addEventListener('input',()=>{state.palIdx=0;renderPalette()});
+$$('.overlay').forEach(o=>o.addEventListener('mousedown',e=>{if(e.target===o)o.classList.add('hidden')}));
+
+/* ---- 快捷键 ---- */
+const helps=[['j / k','上/下移动'],['↵','打开邮件'],['e','归档'],['s','星标'],['u','撤销'],['r','回复'],['a','全部回复'],['f','转发'],['c','写邮件'],['/','搜索'],['⌘K','命令面板'],['?','快捷键'],['esc','关闭浮层']];
+$('#helpBody').innerHTML=helps.map(([k,v])=>`<div class="help-row"><span>${v}</span><span class="kbd">${k}</span></div>`).join('');
+document.addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  const typing=tag==='INPUT'||tag==='TEXTAREA';
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();return;}
+  if(e.key==='Escape'){
+    if(!$('#paletteOverlay').classList.contains('hidden')){closePalette();return;}
+    if(!$('#helpOverlay').classList.contains('hidden')){$('#helpOverlay').classList.add('hidden');return;}
+    if(!$('#composeOverlay').classList.contains('hidden')){closeCompose();return;}
+    if(typing){e.target.blur();return;}
+    return;
+  }
+  if(!$('#paletteOverlay').classList.contains('hidden')){
+    if(e.key==='ArrowDown'){e.preventDefault();state.palIdx=Math.min(state.palItems.length-1,state.palIdx+1);renderPalette();}
+    else if(e.key==='ArrowUp'){e.preventDefault();state.palIdx=Math.max(0,state.palIdx-1);renderPalette();}
+    else if(e.key==='Enter'){e.preventDefault();execPal(state.palIdx);}
+    return;
+  }
+  if(typing) return;
+  if(!$('#composeOverlay').classList.contains('hidden')||!$('#helpOverlay').classList.contains('hidden')) return;
+  const k=e.key.toLowerCase();
+  if(k==='j'){e.preventDefault();move(1)}
+  else if(k==='k'){e.preventDefault();move(-1)}
+  else if(k==='e'){e.preventDefault();doAction('archive')}
+  else if(k==='s'){e.preventDefault();doAction('star')}
+  else if(k==='r'){e.preventDefault();openCompose('reply')}
+  else if(k==='a'){e.preventDefault();openCompose('replyall')}
+  else if(k==='f'){e.preventDefault();openCompose('forward')}
+  else if(k==='c'){e.preventDefault();openCompose('new')}
+  else if(k==='/'){e.preventDefault();$('#searchInput').focus()}
+  else if(k==='?'){e.preventDefault();$('#helpOverlay').classList.remove('hidden')}
+  else if(k==='u'){e.preventDefault();const a=state.undoStack.pop();if(a){a.m.archived=a.wasArchived;a.m.deleted=a.wasDeleted;renderAll();selectMail(a.m.id,false);toast('已撤销')}else toast('没有可撤销的操作')}
+  else if(k==='enter'){if(state.selected){const m=mails.find(x=>x.id===state.selected);m.unread=false;renderCounts();renderList();}}
+});
+
+/* ---- 初始化 ---- */
+try{
+  const th=localStorage.getItem('fold-theme-gmail'); if(th){document.documentElement.dataset.theme=th;$('#themeIcon').setAttribute('href',th==='dark'?'#i-moon':'#i-sun');}
+  const de=localStorage.getItem('fold-density-gmail'); if(de)setDensity(de);
+}catch(e){}
+selectMail(1,false);
+</script>
+</body>
+</html>
