@@ -1,0 +1,19 @@
+[package]
+name = "fold-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Desktop UI for Fold mail client"
+
+[dependencies]
+anyhow.workspace = true
+fold-core.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# UI 框架在 M0 技术验证后确定（iced 或 GPUI），暂不引入
+
+[lints]
+workspace = true
